@@ -50,6 +50,38 @@ async function run() {
 
       res.send(dt.drinks);
     });
+    // Making pagination
+    // Step 1: making an api that will send the total length of data to be displayed
+    app.get("/pageCount", async (req, res) => {
+      const catName = req.query.catname;
+      const dt = await axios
+        .get(
+          `https://www.thecocktaildb.com/api/json/v1/1/filter.php?c=${catName}`
+        )
+        .then((res) => {
+          return res.data;
+        });
+      const count = dt.drinks.length;
+      res.send({ count });
+    });
+    // getting products according to pagination number
+    app.get("/paged", async (req, res) => {
+      const page = parseInt(req.query.page);
+      const type = req.query.type;
+      console.log("Page: ", page, "Type", type);
+      const dt = await axios
+        .get(`https://www.thecocktaildb.com/api/json/v1/1/filter.php?c=${type}`)
+        .then((res) => {
+          return res.data.drinks;
+        });
+      let drinks;
+      // if (page && type) {
+      //   drinks = dt.limit(15);
+      // }
+      const skip = dt.slice(page * 15, page * 15 + 10);
+      res.send(skip);
+      // res.send({ drinks });
+    });
   } finally {
   }
 }
